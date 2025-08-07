@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Movies - Watch</title>
+    <link href="../styles/main.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-youtube/2.6.1/Youtube.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <header class="bg-gray-800 py-4 px-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-red-500">RM Movies</a>
+            <button id="back-btn" class="text-gray-300 hover:text-white">Back</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto py-8 px-4">
+        <video
+            id="movie-player"
+            class="video-js vjs-default-skin vjs-big-play-centered w-full"
+            controls
+            preload="auto"
+            data-setup='{}'>
+            <source src="" type="video/mp4">
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, or consider upgrading to a
+                web browser that supports HTML5 video
+            </p>
+        </video>
+
+        <div class="mt-8">
+            <h2 id="movie-title" class="text-2xl font-bold"></h2>
+            <p id="movie-overview" class="mt-2 text-gray-300"></p>
+            <button id="add-to-watchlist" class="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md">
+                Add to Watchlist
+            </button>
+        </div>
+    </main>
+
+    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+    <script src="../scripts/watch.js"></script>
+</body>
+</html>
