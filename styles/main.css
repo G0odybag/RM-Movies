@@ -8,13 +8,14 @@ body.dark {
 }
 
 .movie-card {
-    @apply relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105;
+    @apply relative overflow-hidden rounded-lg transition-transform duration-300 hover:scale-105;
 }
 
-.movie-card img {
-    @apply w-full h-full object-cover;
+/* Video.js customizations */
+.video-js {
+    @apply w-full rounded-lg overflow-hidden;
 }
 
-.movie-card-overlay {
-    @apply absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4 opacity-0 hover:opacity-100 transition-opacity duration-300;
+.vjs-poster {
+    @apply bg-gray-800;
 }

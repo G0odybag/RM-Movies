@@ -1,14 +1,14 @@
-// Check if user is logged in
+// Check authentication state
 function checkAuth() {
     const user = localStorage.getItem('currentUser');
     if (user && window.location.pathname.includes('auth.html')) {
         window.location.href = 'dashboard.html';
-    } else if (!user && !window.location.pathname.includes('auth.html')) {
-        window.location.href = 'auth.html';
+    } else if (!user && !window.location.pathname.includes('auth.html') && !window.location.pathname.includes('index.html')) {
+        window.location.href = 'index.html';
     }
 }
 
-// Toggle between login and signup forms
+// Toggle between login/signup
 document.getElementById('switch-to-signup')?.addEventListener('click', () => {
     document.getElementById('login-form').classList.add('hidden');
     document.getElementById('signup-form').classList.remove('hidden');
@@ -56,10 +56,10 @@ document.querySelector('#signup-form form')?.addEventListener('submit', (e) => {
     }
     
     const newUser = {
-        id: Date.now(),
+        id: Date.now().toString(),
         email,
         password,
-        watchlist: []
+        favorites: []
     };
     
     users.push(newUser);
@@ -69,5 +69,5 @@ document.querySelector('#signup-form form')?.addEventListener('submit', (e) => {
     window.location.href = 'dashboard.html';
 });
 
-// Check auth on page load
+// Initialize auth check
 checkAuth();
