@@ -1,3 +1,5 @@
+// Update your watch.js with this implementation:
+
 // Get movie ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const movieId = urlParams.get('id');
@@ -9,11 +11,14 @@ if (!currentUser) {
     window.location.href = 'auth.html';
 }
 
-// Initialize player
+// Initialize player with YouTube tech
 const player = videojs('movie-player', {
-    controls: true,
-    autoplay: true,
-    preload: 'auto'
+    techOrder: ['youtube'], // Force YouTube player
+    sources: [], // We'll set this dynamically
+    youtube: {
+        ytControls: 2, // Show controls
+        rel: 0 // Don't show related videos at the end
+    }
 });
 
 // Load movie data
@@ -23,40 +28,66 @@ async function loadMovie() {
         return;
     }
 
-    const [movie, videos] = await Promise.all([
-        fetchMovieDetails(movieId),
-        fetchMovieVideos(movieId)
-    ]);
+    try {
+        const [movie, videos] = await Promise.all([
+            fetchMovieDetails(movieId),
+            fetchMovieVideos(movieId)
+        ]);
 
-    if (!movie) {
-        window.location.href = 'index.html';
-        return;
+        if (!movie) {
+            throw new Error('Movie not found');
+        }
+
+        // Update movie info
+        document.getElementById('movie-title').textContent = movie.title;
+        document.getElementById('movie-overview').textContent = movie.overview;
+        document.getElementById('movie-rating').textContent = movie.vote_average.toFixed(1);
+        document.getElementById('movie-year').textContent = movie.release_date?.split('-')[0] || 'N/A';
+
+        // Find YouTube trailer
+        const trailer = videos.find(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'));
+        const videoKey = trailer?.key || videos[0]?.key;
+
+        if (!videoKey) {
+            throw new Error('No video available');
+        }
+
+        // Set video source
+        player.src({
+            type: 'video/youtube',
+            src: `https://www.youtube.com/watch?v=${videoKey}`
+        });
+
+        // Check if movie is in favorites
+        updateFavoriteButton(movieId);
+
+    } catch (error) {
+        console.error('Error loading movie:', error);
+        document.getElementById('player-container').innerHTML = `
+            <div class="bg-gray-800 rounded-lg p-8 text-center">
+                <h3 class="text-xl font-bold mb-2">Video Not Available</h3>
+                <p class="text-gray-400 mb-4">${error.message}</p>
+                <button onclick="window.location.href='index.html'" 
+                        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md">
+                    Back to Home
+                </button>
+            </div>
+        `;
     }
+}
 
-    // Update movie info
-    document.getElementById('movie-title').textContent = movie.title;
-    document.getElementById('movie-overview').textContent = movie.overview;
-    document.getElementById('movie-rating').textContent = movie.vote_average.toFixed(1);
-    document.getElementById('movie-year').textContent = movie.release_date.split('-')[0];
-
-    // Find YouTube trailer
-    const trailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer');
-    const videoKey = trailer?.key || videos[0]?.key || 'dQw4w9WgXcQ'; // Fallback to Rick Astley
-
-    // Set video source
-    player.src({
-        src: `https://www.youtube.com/watch?v=${videoKey}`,
-        type: 'video/youtube'
-    });
-
-    // Check if movie is in favorites
+function updateFavoriteButton(movieId) {
     const favoriteBtn = document.getElementById('favorite-btn');
-    if (currentUser.favorites.includes(movieId.toString())) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (currentUser?.favorites?.includes(movieId.toString())) {
         favoriteBtn.textContent = 'Remove from Favorites';
         favoriteBtn.classList.add('bg-red-600');
+        favoriteBtn.classList.remove('bg-gray-700');
     } else {
         favoriteBtn.textContent = 'Add to Favorites';
         favoriteBtn.classList.remove('bg-red-600');
+        favoriteBtn.classList.add('bg-gray-700');
     }
 }
 
@@ -67,22 +98,18 @@ document.getElementById('favorite-btn')?.addEventListener('click', () => {
     
     if (userIndex !== -1) {
         const favIndex = users[userIndex].favorites.indexOf(movieId.toString());
-        const favoriteBtn = document.getElementById('favorite-btn');
         
         if (favIndex === -1) {
             // Add to favorites
             users[userIndex].favorites.push(movieId.toString());
-            favoriteBtn.textContent = 'Remove from Favorites';
-            favoriteBtn.classList.add('bg-red-600');
         } else {
             // Remove from favorites
             users[userIndex].favorites.splice(favIndex, 1);
-            favoriteBtn.textContent = 'Add to Favorites';
-            favoriteBtn.classList.remove('bg-red-600');
         }
         
         localStorage.setItem('users', JSON.stringify(users));
         localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+        updateFavoriteButton(movieId);
     }
 });
 

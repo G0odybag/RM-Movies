@@ -2,19 +2,31 @@ const API_KEY = '747346fe6a2fe0338047bac48babc201';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
-// Axios instance with auth header
-const api = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3NDczNDZmZTZhMmZlMDMzODA0N2JhYzQ4YmFiYzIwMSIsInN1YiI6IjY2MjYyMWQ5NjJmMzM1MDE0YjA0YmQ3YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.7QHRqJZ1Q8QZQZQZQZQZQZQZQZQZQZQZQZQZQZQZQZQ`
+// Common headers for fetch requests
+const headers = {
+    'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3NDczNDZmZTZhMmZlMDMzODA0N2JhYzQ4YmFiYzIwMSIsInN1YiI6IjY2MjYyMWQ5NjJmMzM1MDE0YjA0YmQ3YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.7QHRqJZ1Q8QZQZQZQZQZQZQZQZQZQZQZQZQZQZQZQZQ`,
+    'Accept': 'application/json'
+};
+
+// Helper function to handle fetch requests
+async function makeRequest(url) {
+    try {
+        const response = await fetch(url, { headers });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Request failed:', error);
+        throw error;
     }
-});
+}
 
 // Fetch trending movies
 async function fetchTrendingMovies() {
     try {
-        const response = await api.get(`/trending/movie/week?api_key=${API_KEY}`);
-        return response.data.results;
+        const data = await makeRequest(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+        return data.results || [];
     } catch (error) {
         console.error('Error fetching trending movies:', error);
         return [];
@@ -24,8 +36,8 @@ async function fetchTrendingMovies() {
 // Fetch popular movies
 async function fetchPopularMovies() {
     try {
-        const response = await api.get(`/movie/popular?api_key=${API_KEY}`);
-        return response.data.results;
+        const data = await makeRequest(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+        return data.results || [];
     } catch (error) {
         console.error('Error fetching popular movies:', error);
         return [];
@@ -35,8 +47,8 @@ async function fetchPopularMovies() {
 // Search movies
 async function searchMovies(query) {
     try {
-        const response = await api.get(`/search/movie?api_key=${API_KEY}&query=${query}`);
-        return response.data.results;
+        const data = await makeRequest(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+        return data.results || [];
     } catch (error) {
         console.error('Error searching movies:', error);
         return [];
@@ -46,8 +58,8 @@ async function searchMovies(query) {
 // Fetch movie details
 async function fetchMovieDetails(movieId) {
     try {
-        const response = await api.get(`/movie/${movieId}?api_key=${API_KEY}`);
-        return response.data;
+        const data = await makeRequest(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
+        return data || null;
     } catch (error) {
         console.error('Error fetching movie details:', error);
         return null;
@@ -57,15 +69,15 @@ async function fetchMovieDetails(movieId) {
 // Fetch movie videos (trailers)
 async function fetchMovieVideos(movieId) {
     try {
-        const response = await api.get(`/movie/${movieId}/videos?api_key=${API_KEY}`);
-        return response.data.results;
+        const data = await makeRequest(`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`);
+        return data.results || [];
     } catch (error) {
         console.error('Error fetching movie videos:', error);
         return [];
     }
 }
 
-// Render movie cards
+// Render movie cards (unchanged from original)
 function renderMovieCards(movies, containerId) {
     const container = document.getElementById(containerId);
     
@@ -106,7 +118,7 @@ function renderMovieCards(movies, containerId) {
     });
 }
 
-// Toggle favorite status
+// Toggle favorite status (unchanged from original)
 function toggleFavorite(movieId, button) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser) {
@@ -136,7 +148,6 @@ function toggleFavorite(movieId, button) {
         localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
     }
 }
-
 // Initialize homepage
 if (document.getElementById('trending-movies')) {
     Promise.all([fetchTrendingMovies(), fetchPopularMovies()])

@@ -1,6 +1,8 @@
 // Get current user
 const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
+alert("Hello from here man")
+
 if (!currentUser) {
     window.location.href = 'auth.html';
 }
